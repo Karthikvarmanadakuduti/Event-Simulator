@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Simulator</title>
+  <style>
+    body { font-family: Arial, sans-serif;
+    text-align: center; }
+    .grid { display: grid;
+    grid-template-columns: repeat(10, 80px);
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px; }
+    button { width: 80px;
+    height: 80px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer; }
+    .green { background: green; }
+    .red { background: red; }
+  </style>
+</head>
+<body>
+  <h1>Event Simulator</h1>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const grid = document.getElementById("grid");
+
+    // Create 100 buttons
+    for (let i = 1; i <= 100; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i.toString().padStart(4, "0");
+      btn.classList.add("green");
+      btn.dataset.status = "0"; // 0 = green, 1 = red
+      btn.dataset.channel = i.toString().padStart(4, "0");
+
+      btn.addEventListener("click", () => {
+        // Toggle color
+        if (btn.dataset.status === "0") {
+          btn.dataset.status = "1";
+          btn.classList.remove("green");
+          btn.classList.add("red");
+        } else {
+          btn.dataset.status = "0";
+          btn.classList.remove("red");
+          btn.classList.add("green");
+        }
+
+        // Send to backend
+        fetch("http://localhost:3000/event", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ch_no: btn.dataset.channel,
+            status: btn.dataset.status
+          })
+        })
+        .then(res => res.json())
+        .then(data => console.log("Stored:", data))
+        .catch(err => console.error("Error:", err));
+      });
+
+      grid.appendChild(btn);
+    }
+  </script>
+</body>
+</html>
